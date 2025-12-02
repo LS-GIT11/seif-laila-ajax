@@ -4,32 +4,10 @@
   const hotspots = document.querySelectorAll(".Hotspot");
   const materialTemplate = document.querySelector("#material-template");
   const materialList = document.querySelector("#material-list");
-
+  const materialLoader = document.querySelector('#material-loader');
+  const materialError = document.querySelector('#material-error');
   //This information needs to be removed then pulled with an AJAX Call using the Fetch API
   //this is the api url https://swiftpixel.com/earbud/api/materials"
-
-  const materialListData = [
-    {
-      heading: "Precision-Crafted Polymers",
-      description: "Our earbuds are meticulously molded from high-quality plastics, ensuring a blend of elegance, comfort, and resilience that's second to none."
-    },
-    {
-      heading: "Luxurious Silicone Harmony",
-      description: "Our uniquely engineered ear tips are cocooned in plush silicone, delivering an opulent embrace for your ears, ensuring an unrivaled fit and exquisite audio experience."
-    },
-    {
-      heading: "Rubberized Cables",
-      description: "Experience the unparalleled freedom of movement with our flexible rubber cables that promise durability without compromise."
-    },
-    {
-      heading: "Enhanced Comfort Sensors",
-      description: "A touch of magic in the form of built-in microphones and sensors empowers your earbuds to obey your every command, making your audio journey seamless and enchanting."
-    },
-    {
-      heading: "Artistic Mesh Guard",
-      description: "Shielded by artful mesh screens, our speakers remain untarnished, keeping your listening experience pristine."
-    }
-  ];
 
   //functions
   function loadInfoBoxes() {
@@ -64,28 +42,58 @@
   function loadMaterialInfo() {
 
     //Add loader in HTML, write code to show it here
+    startLoading();
 
     //make AJAX Call here
+    fetch("https://swiftpixel.com/earbud/api/materials")
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (materials) {
+        materials.forEach(function (material) {
+
+          const clone = materialTemplate.content.cloneNode(true);
+
+          const materialHeading = clone.querySelector(".material-heading");
+          materialHeading.textContent = material.heading;
+
+          const materialDescription = clone.querySelector(".material-description");
+
+          materialDescription.textContent = material.description;
+
+          materialList.appendChild(clone);
+
+          stopLoading();
+        });
+      })
+
+      .catch(function (error) {
+        handleMaterialError(error);
+      });
+
+      
 
      //this is the api url https://swiftpixel.com/earbud/api/materials"
 
-
-    materialListData.forEach(material => {
-      // clone the template li with h3 and p inside
-      const clone = materialTemplate.content.cloneNode(true);
-      // populate the cloned template
-      const materialHeading = clone.querySelector(".material-heading");
-      materialHeading.textContent = material.heading;
-
-      const materialDescription = clone.querySelector(".material-description");
-      materialDescription.textContent = material.description;
-
-      //Hide the loader
-
-      //Append the populated template to the list
-      materialList.appendChild(clone);
-    })
   }
+
+  function startLoading() {
+    materialLoader.style.display = "block";
+    materialError.hidden = true;
+    materialError.textContent = "";
+  }
+
+  function stopLoading() {
+    materialLoader.style.display = "none";
+  }
+
+  function handleMaterialError(error) {
+    console.log(error);
+    stopLoading();
+    materialError.hidden = false;
+    materialError.textContent = "Error loading materials. Please try again later..."
+  }
+
   loadMaterialInfo();
 
 
