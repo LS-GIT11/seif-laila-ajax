@@ -63,8 +63,9 @@
 
           materialList.appendChild(clone);
 
-          stopLoading();
         });
+
+        stopLoading();
       })
 
       .catch(function (error) {
